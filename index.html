@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReciclaAi - Gamificação da Reciclagem</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+        }
+        /* Custom scrollbar for clean look */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        @keyframes pulse-slow {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.08); opacity: 0.8; }
+        }
+        .animate-pulse-slow {
+            animation: pulse-slow 3s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-800 flex justify-center items-center min-h-screen p-0 sm:p-4">
+
+    <!-- Mobile Device Frame Container -->
+    <div id="app-container" class="w-full max-w-md bg-slate-50 min-h-screen sm:min-h-[850px] sm:max-h-[900px] sm:rounded-3xl shadow-2xl flex flex-col relative overflow-hidden border-0 sm:border-8 sm:border-slate-800">
+
+        <!-- Top Header Bar -->
+        <header class="bg-emerald-700 text-white px-4 py-3 flex items-center justify-between shadow-md z-20">
+            <div class="flex items-center space-x-3">
+                <button id="sidebar-toggle" class="p-1.5 rounded-xl hover:bg-emerald-600 transition-colors focus:outline-none">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+                <div class="flex items-center space-x-2">
+                    <div class="bg-emerald-500 p-1.5 rounded-lg text-white">
+                        <i data-lucide="recycle" class="w-5 h-5"></i>
+                    </div>
+                    <span class="font-bold text-lg tracking-tight">ReciclaAi</span>
+                </div>
+            </div>
+
+            <!-- Points Badge -->
+            <div class="flex items-center bg-emerald-800/80 px-3 py-1.5 rounded-full border border-emerald-600/50 shadow-inner">
+                <i data-lucide="award" class="w-4 h-4 text-amber-300 mr-1.5 animate-bounce"></i>
+                <span id="user-points-header" class="font-bold text-sm text-amber-200">1.250 pts</span>
+            </div>
+        </header>
+
+        <!-- Sidebar Overlay -->
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-40 opacity-0 pointer-events-none transition-opacity duration-300 sm:absolute"></div>
+
+        <!-- Sidebar (Drawer) -->
+        <aside id="sidebar" class="absolute top-0 left-0 bottom-0 w-72 bg-white z-50 transform -translate-x-full transition-transform duration-300 ease-in-out flex flex-col shadow-2xl">
+            <!-- Sidebar Header -->
+            <div class="bg-gradient-to-br from-emerald-700 to-emerald-900 p-6 text-white relative">
+                <button id="sidebar-close" class="absolute top-4 right-4 text-emerald-200 hover:text-white p-1">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+                <div class="flex items-center space-x-3 mt-2">
+                    <div class="w-14 h-14 rounded-full bg-emerald-500 border-2 border-white/80 overflow-hidden flex items-center justify-center text-2xl font-bold shadow-md">
+                        🌿
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-lg leading-tight">Mariana Silva</h3>
+                        <p class="text-xs text-emerald-200 mt-0.5">Eco-Guerreiro • Nível 4</p>
+                    </div>
+                </div>
+                <div class="mt-4 bg-emerald-800/60 rounded-xl p-2.5 flex items-center justify-between text-xs text-emerald-100">
+                    <span>Progresso para Nível 5</span>
+                    <span class="font-semibold text-amber-300">75%</span>
+                </div>
+                <div class="w-full bg-emerald-950/50 rounded-full h-1.5 mt-1 overflow-hidden">
+                    <div class="bg-amber-400 h-full rounded-full" style="width: 75%"></div>
+                </div>
+            </div>
+
+            <!-- Sidebar Navigation Links -->
+            <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+                <button onclick="switchTab('map')" class="sidebar-link w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 font-medium transition-all group active">
+                    <div class="p-2 rounded-xl bg-emerald-100 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                        <i data-lucide="map" class="w-5 h-5"></i>
+                    </div>
+                    <span>Mapa de Reciclagem</span>
+                </button>
+
+                <button onclick="switchTab('store')" class="sidebar-link w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 font-medium transition-all group">
+                    <div class="p-2 rounded-xl bg-slate-100 text-slate-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                        <i data-lucide="shopping-bag" class="w-5 h-5"></i>
+                    </div>
+                    <span>Loja de Recompensas</span>
+                </button>
+
+                <button onclick="switchTab('profile')" class="sidebar-link w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 font-medium transition-all group">
+                    <div class="p-2 rounded-xl bg-slate-100 text-slate-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                        <i data-lucide="user" class="w-5 h-5"></i>
+                    </div>
+                    <span>Perfil & Gamificação</span>
+                </button>
+            </nav>
+
+            <!-- Sidebar Footer / Quick Deposit Action -->
+            <div class="p-4 border-t border-slate-100">
+                <button onclick="openDepositModal()" class="w-full bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white py-3 px-4 rounded-2xl font-semibold shadow-lg shadow-emerald-600/20 flex items-center justify-center space-x-2 transition-all active:scale-95">
+                    <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                    <span>Registrar Descarte</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main id="main-content" class="flex-1 overflow-y-auto relative flex flex-col bg-slate-100">
+            <!-- Dynamic Tab Content injected via JS -->
+        </main>
+
+        <!-- Bottom Navigation Bar (Mobile Native Style) -->
+        <nav class="bg-white border-t border-slate-200 px-6 py-2 flex justify-around items-center z-10 shadow-lg">
+            <button onclick="switchTab('map')" id="nav-btn-map" class="nav-tab flex flex-col items-center py-1 text-emerald-600 transition-colors">
+                <i data-lucide="map" class="w-6 h-6"></i>
+                <span class="text-[11px] font-medium mt-1">Mapa</span>
+            </button>
+            <button onclick="switchTab('store')" id="nav-btn-store" class="nav-tab flex flex-col items-center py-1 text-slate-400 hover:text-emerald-600 transition-colors">
+                <i data-lucide="shopping-bag" class="w-6 h-6"></i>
+                <span class="text-[11px] font-medium mt-1">Loja</span>
+            </button>
+            <button onclick="switchTab('profile')" id="nav-btn-profile" class="nav-tab flex flex-col items-center py-1 text-slate-400 hover:text-emerald-600 transition-colors">
+                <i data-lucide="user" class="w-6 h-6"></i>
+                <span class="text-[11px] font-medium mt-1">Perfil</span>
+            </button>
+        </nav>
+
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50 flex flex-col space-y-2 pointer-events-none w-11/12 max-w-sm"></div>
+
+    <!-- Modal Registrar Descarte -->
+    <div id="deposit-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl transform scale-95 transition-transform duration-300" id="deposit-modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <div class="flex items-center space-x-2">
+                    <div class="p-2 bg-emerald-100 text-emerald-600 rounded-xl">
+                        <i data-lucide="recycle" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="font-bold text-lg text-slate-800">Registrar Descarte</h3>
+                </div>
+                <button onclick="closeDepositModal()" class="text-slate-400 hover:text-slate-600 p-1">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <p class="text-xs text-slate-500 mb-4">Selecione o tipo de material reciclado entregue para ganhar pontos e XP imediatamente.</p>
+            
+            <div class="space-y-3 mb-5">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Tipo de Material</label>
+                    <select id="deposit-material" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        <option value="plastico">Plástico (PET, PEAD) — 150 pts</option>
+                        <option value="papel">Papel e Papelão — 100 pts</option>
+                        <option value="vidro">Vidro (Garrafas, Potes) — 120 pts</option>
+                        <option value="metal">Metal (Alumínio, Aço) — 200 pts</option>
+                        <option value="eletrônicos">Eletrônicos & Baterias — 350 pts</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Peso Estimado (kg / unidades)</label>
+                    <input type="number" id="deposit-weight" value="1.5" step="0.5" min="0.5" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                </div>
+            </div>
+
+            <button onclick="confirmDeposit()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-semibold shadow-lg shadow-emerald-600/30 transition-all flex items-center justify-center space-x-2">
+                <i data-lucide="check-circle" class="w-5 h-5"></i>
+                <span>Confirmar e Ganhar Pontos</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Global Application State
+        const state = {
+            activeTab: 'map',
+            points: 1250,
+            xp: 750,
+            level: 4,
+            levelTitle: 'Eco-Guerreiro',
+            stats: {
+                kgRecycled: 34.5,
+                collections: 12,
+                co2Saved: '58 kg'
+            },
+            selectedCategory: 'all',
+            searchQuery: '',
+            selectedPoint: null,
+            routeActive: false,
+            pointsHistory: [
+                { id: 1, title: 'Descarte de Plásticos e Vidros', points: +150, date: 'Ontem, 14:30' },
+                { id: 2, title: 'Reciclagem de Eletrônicos', points: +300, date: '3 dias atrás' },
+                { id: 3, title: 'Ecobag Resgatada', points: -450, date: '5 dias atrás' }
+            ],
+            rewards: [
+                { id: 1, title: 'Ecobag de Algodão Orgânico', desc: 'Feita 100% de algodão reciclado e sustentável.', cost: 450, image: 'https://images.unsplash.com/photo-1597848212624-a19eb35e2651?auto=format&fit=crop&w=400&q=80', redeemed: false },
+                { id: 2, title: 'Copo Térmico Reutilizável', desc: 'Mantenha suas bebidas na temperatura ideal.', cost: 800, image: 'https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?auto=format&fit=crop&w=400&q=80', redeemed: false },
+                { id: 3, title: '20% Desconto em Supermercado', desc: 'Válido em redes parceiras de produtos ecológicos.', cost: 600, image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=400&q=80', redeemed: false },
+                { id: 4, title: 'Plantio de 1 Árvore em Seu Nome', desc: 'Certificado digital de plantio na Mata Atlântica.', cost: 1000, image: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=400&q=80', redeemed: false }
+            ],
+            achievements: [
+                { id: 1, title: 'Iniciante Verde', desc: 'Realize sua primeira reciclagem', icon: '🌱', unlocked: true },
+                { id: 2, title: 'Mestre do Plástico', desc: 'Recicle 10kg de plástico', icon: '♻️', unlocked: true },
+                { id: 3, title: 'Guardião da Eletrônica', desc: 'Descarte 3 eletrônicos corretamente', icon: '💻', unlocked: false },
+                { id: 4, title: 'Eco-Campeão', desc: 'Acumule 2000 pontos totais', icon: '🏆', unlocked: false }
+            ],
+            collectionPoints: [
+                { id: 1, name: 'EcoPonto Central Verde', type: 'plastico', address: 'Av. Paulista, 1000 - Centro', materials: ['Plástico', 'Papel', 'Metal'], distance: '350m', top: '35%', left: '45%', color: 'bg-emerald-500' },
+                { id: 2, name: 'ReciclaMais Sustentável', type: 'eletronicos', address: 'Rua Augusta, 450 - Consolação', materials: ['Eletrônicos', 'Baterias', 'Metais'], distance: '700m', top: '60%', left: '25%', color: 'bg-amber-500' },
+                { id: 3, name: 'Vidro & Vida Coleta', type: 'vidro', address: 'Rua da Consolação, 1200', materials: ['Vidro', 'Garrafas'], distance: '1.2km', top: '25%', left: '70%', color: 'bg-blue-500' },
+                { id: 4, name: 'Cooperativa EcoPapel', type: 'papel', address: 'Alameda Santos, 800', materials: ['Papelão', 'Jornais', 'Papel Office'], distance: '1.5km', top: '75%', left: '75%', color: 'bg-orange-500' }
+            ]
+        };
+
+        // Initialize App on DOMContentLoaded
+        document.addEventListener('DOMContentLoaded', () => {
+            setupSidebarEvents();
+            renderApp();
+            updateHeaderPoints();
+        });
+
+        // Sidebar Handling
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+        const sidebarClose = document.getElementById('sidebar-close');
+
+        function setupSidebarEvents() {
+            sidebarToggle.addEventListener('click', toggleSidebar);
+            sidebarClose.addEventListener('click', toggleSidebar);
+            sidebarOverlay.addEventListener('click', toggleSidebar);
+        }
+
+        function toggleSidebar() {
+            const isOpen = sidebar.classList.contains('translate-x-0');
+            if (isOpen) {
+                sidebar.classList.remove('translate-x-0');
+                sidebar.classList.add('-translate-x-full');
+                sidebarOverlay.classList.remove('opacity-100', 'pointer-events-auto');
+                sidebarOverlay.classList.add('opacity-0', 'pointer-events-none');
+            } else {
+                sidebar.classList.remove('-translate-x-full');
+                sidebar.classList.add('translate-x-0');
+                sidebarOverlay.classList.remove('opacity-0', 'pointer-events-none');
+                sidebarOverlay.classList.add('opacity-100', 'pointer-events-auto');
+            }
+        }
+
+        // Tab Switching Logic
+        function switchTab(tabName) {
+            state.activeTab = tabName;
+            if (sidebar.classList.contains('translate-x-0')) {
+                toggleSidebar();
+            }
+
+            // Update bottom nav UI
+            document.querySelectorAll('.nav-tab').forEach(btn => {
+                btn.classList.remove('text-emerald-600');
+                btn.classList.add('text-slate-400');
+            });
+            const activeNavBtn = document.getElementById(`nav-btn-${tabName}`);
+            if (activeNavBtn) {
+                activeNavBtn.classList.remove('text-slate-400');
+                activeNavBtn.classList.add('text-emerald-600');
+            }
+
+            renderApp();
+        }
+
+        function updateHeaderPoints() {
+            document.getElementById('user-points-header').innerText = `${state.points.toLocaleString()} pts`;
+        }
+
+        // Render Main View based on activeTab
+        function renderApp() {
+            const mainContent = document.getElementById('main-content');
+            mainContent.innerHTML = '';
+
+            if (state.activeTab === 'map') {
+                mainContent.innerHTML = renderMapView();
+                initMapInteractions();
+            } else if (state.activeTab === 'store') {
+                mainContent.innerHTML = renderStoreView();
+            } else if (state.activeTab === 'profile') {
+                mainContent.innerHTML = renderProfileView();
+            }
+
+            // Re-initialize Lucide icons for dynamically added HTML
+            lucide.createIcons();
+        }
+
+        // ==================== 1. MAP VIEW ====================
+        function renderMapView() {
+            const filteredPoints = state.collectionPoints.filter(p => {
+                const matchesCategory = state.selectedCategory === 'all' || p.type === state.selectedCategory;
+                const matchesSearch = p.name.toLowerCase().includes(state.searchQuery.toLowerCase()) || 
+                                      p.address.toLowerCase().includes(state.searchQuery.toLowerCase()) ||
+                                      p.materials.some(m => m.toLowerCase().includes(state.searchQuery.toLowerCase()));
+                return matchesCategory && matchesSearch;
+            });
+
+            return `
+                <div class="flex-1 relative flex flex-col h-full overflow-hidden">
+                    <!-- Top Search and Category Filters -->
+                    <div class="absolute top-3 left-3 right-3 z-10 flex flex-col space-y-2">
+                        <!-- Search Bar -->
+                        <div class="bg-white/95 backdrop-blur-md rounded-2xl shadow-lg border border-slate-200/80 px-4 py-2 flex items-center space-x-2">
+                            <i data-lucide="search" class="w-5 h-5 text-slate-400"></i>
+                            <input type="text" id="map-search-input" value="${state.searchQuery}" placeholder="Buscar materiais, ecopontos..." oninput="handleMapSearch(event)" class="w-full bg-transparent text-sm text-slate-800 placeholder-slate-400 focus:outline-none">
+                            ${state.searchQuery ? `<button onclick="clearSearch()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>` : ''}
+                        </div>
+
+                        <!-- Category Chips Scrollable -->
+                        <div class="flex space-x-2 overflow-x-auto pb-1 no-scrollbar">
+                            <button onclick="setCategory('all')" class="px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap shadow-sm transition-all ${state.selectedCategory === 'all' ? 'bg-emerald-700 text-white shadow-emerald-700/30' : 'bg-white/95 text-slate-600 border border-slate-200 hover:bg-slate-50'}">
+                                🌐 Todos
+                            </button>
+                            <button onclick="setCategory('plastico')" class="px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap shadow-sm transition-all ${state.selectedCategory === 'plastico' ? 'bg-emerald-700 text-white shadow-emerald-700/30' : 'bg-white/95 text-slate-600 border border-slate-200 hover:bg-slate-50'}">
+                                🧴 Plástico
+                            </button>
+                            <button onclick="setCategory('papel')" class="px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap shadow-sm transition-all ${state.selectedCategory === 'papel' ? 'bg-emerald-700 text-white shadow-emerald-700/30' : 'bg-white/95 text-slate-600 border border-slate-200 hover:bg-slate-50'}">
+                                📦 Papel
+                            </button>
+                            <button onclick="setCategory('vidro')" class="px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap shadow-sm transition-all ${state.selectedCategory === 'vidro' ? 'bg-emerald-700 text-white shadow-emerald-700/30' : 'bg-white/95 text-slate-600 border border-slate-200 hover:bg-slate-50'}">
+                                🍾 Vidro
+                            </button>
+                            <button onclick="setCategory('eletronicos')" class="px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap shadow-sm transition-all ${state.selectedCategory === 'eletronicos' ? 'bg-emerald-700 text-white shadow-emerald-700/30' : 'bg-white/95 text-slate-600 border border-slate-200 hover:bg-slate-50'}">
+                                💻 Eletrônicos
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Simulated Interactive Map Container -->
+                    <div class="flex-1 bg-emerald-950/10 relative overflow-hidden cursor-grab active:cursor-grabbing" id="map-canvas">
+                        <!-- Simulated Map Grid Pattern & Roads Background -->
+                        <div class="absolute inset-0 opacity-20 pointer-events-none" style="background-image: radial-gradient(#10b981 1.5px, transparent 1.5px); background-size: 24px 24px;"></div>
+                        
+                        <!-- Decorative Map Roads -->
+                        <div class="absolute top-1/3 left-0 right-0 h-4 bg-slate-200/80 -rotate-12 pointer-events-none"></div>
+                        <div class="absolute top-0 bottom-0 left-1/2 w-6 bg-slate-200/80 rotate-6 pointer-events-none"></div>
+
+                        <!-- User Current Location Marker -->
+                        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10 flex flex-col items-center pointer-events-none">
+                            <div class="w-6 h-6 bg-blue-500 rounded-full border-4 border-white shadow-lg animate-ping absolute"></div>
+                            <div class="w-6 h-6 bg-blue-600 rounded-full border-2 border-white shadow-xl flex items-center justify-center text-white">
+                                <i data-lucide="navigation" class="w-3 h-3"></i>
+                            </div>
+                            <span class="bg-slate-900/80 text-white text-[10px] px-2 py-0.5 rounded-full mt-1 font-medium shadow">Você está aqui</span>
+                        </div>
+
+                        <!-- Route SVG Line if route active -->
+                        ${state.routeActive && state.selectedPoint ? `
+                            <svg class="absolute inset-0 w-full h-full pointer-events-none z-10">
+                                <line x1="50%" y1="50%" x2="${state.selectedPoint.left}" y2="${state.selectedPoint.top}" stroke="#10b981" stroke-width="4" stroke-dasharray="8 4" class="animate-pulse" />
+                            </svg>
+                        ` : ''}
+
+                        <!-- Collection Points Markers -->
+                        ${filteredPoints.map(point => `
+                            <button onclick="selectPoint(${point.id})" class="absolute transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center group z-20 transition-transform hover:scale-110" style="top: ${point.top}; left: ${point.left};">
+                                <div class="w-10 h-10 ${point.color} text-white rounded-2xl shadow-xl flex items-center justify-center border-2 border-white ${state.selectedPoint && state.selectedPoint.id === point.id ? 'ring-4 ring-emerald-400 scale-110' : ''}">
+                                    <i data-lucide="${point.type === 'eletronicos' ? 'cpu' : point.type === 'vidro' ? 'wine' : 'recycle'}" class="w-5 h-5"></i>
+                                </div>
+                                <span class="bg-white/90 backdrop-blur text-slate-800 text-[11px] font-bold px-2 py-0.5 rounded-md mt-1 shadow border border-slate-200 whitespace-nowrap">${point.name}</span>
+                            </button>
+                        `).join('')}
+                    </div>
+
+                    <!-- Selected Point Bottom Sheet Card -->
+                    ${state.selectedPoint ? `
+                        <div class="absolute bottom-3 left-3 right-3 bg-white rounded-3xl p-5 shadow-2xl border border-slate-200 z-30 animate-in fade-in slide-in-from-bottom duration-300">
+                            <div class="flex justify-between items-start mb-2">
+                                <div>
+                                    <span class="text-[10px] font-bold tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full uppercase">${state.selectedPoint.type}</span>
+                                    <h3 class="font-bold text-base text-slate-800 mt-1">${state.selectedPoint.name}</h3>
+                                </div>
+                                <button onclick="closePointCard()" class="text-slate-400 hover:text-slate-600 p-1">
+                                    <i data-lucide="x" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+                            <p class="text-xs text-slate-500 flex items-center mb-3">
+                                <i data-lucide="map-pin" class="w-3.5 h-3.5 mr-1 text-slate-400"></i>
+                                ${state.selectedPoint.address} • <span class="text-emerald-600 font-semibold ml-1">${state.selectedPoint.distance}</span>
+                            </p>
+                            <div class="mb-4">
+                                <span class="text-xs font-semibold text-slate-700 block mb-1">Materiais Aceitos:</span>
+                                <div class="flex flex-wrap gap-1.5">
+                                    ${state.selectedPoint.materials.map(m => `<span class="bg-slate-100 text-slate-700 text-xs px-2.5 py-1 rounded-lg font-medium">${m}</span>`).join('')}
+                                </div>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button onclick="toggleRoute()" class="flex-1 ${state.routeActive ? 'bg-amber-600 hover:bg-amber-700' : 'bg-emerald-600 hover:bg-emerald-700'} text-white py-2.5 px-4 rounded-xl font-semibold text-sm shadow-md transition-all flex items-center justify-center space-x-2">
+                                    <i data-lucide="${state.routeActive ? 'x-circle' : 'navigation'}" class="w-4 h-4"></i>
+                                    <span>${state.routeActive ? 'Cancelar Rota' : 'Traçar Rota'}</span>
+                                </button>
+                                <button onclick="openDepositModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 py-2.5 px-4 rounded-xl font-semibold text-sm transition-all flex items-center justify-center space-x-1">
+                                    <i data-lucide="gift" class="w-4 h-4 text-emerald-600"></i>
+                                    <span>Descartar Aqui</span>
+                                </button>
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    <!-- Floating Action Button for quick deposit -->
+                    <button onclick="openDepositModal()" class="absolute right-4 bottom-6 bg-emerald-600 hover:bg-emerald-700 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center z-10 transition-transform hover:scale-105 active:scale-95">
+                        <i data-lucide="plus" class="w-7 h-7"></i>
+                    </button>
+                </div>
+            `;
+        }
+
+        function handleMapSearch(e) {
+            state.searchQuery = e.target.value;
+            renderApp();
+            // Keep input focused
+            setTimeout(() => {
+                const input = document.getElementById('map-search-input');
+                if (input) {
+                    input.focus();
+                    input.setSelectionRange(input.value.length, input.value.length);
+                }
+            }, 50);
+        }
+
+        function clearSearch() {
+            state.searchQuery = '';
+            renderApp();
+        }
+
+        function setCategory(cat) {
+            state.selectedCategory = cat;
+            renderApp();
+        }
+
+        function selectPoint(id) {
+            state.selectedPoint = state.collectionPoints.find(p => p.id === id);
+            state.routeActive = false;
+            renderApp();
+        }
+
+        function closePointCard() {
+            state.selectedPoint = null;
+            state.routeActive = false;
+            renderApp();
+        }
+
+        function toggleRoute() {
+            state.routeActive = !state.routeActive;
+            renderApp();
+            if (state.routeActive) {
+                showToast(`Rota traçada para ${state.selectedPoint.name}! Siga as indicações.`);
+            }
+        }
+
+        function initMapInteractions() {
+            // Map click outside points deselects
+            const mapCanvas = document.getElementById('map-canvas');
+            if (mapCanvas) {
+                mapCanvas.addEventListener('click', (e) => {
+                    if (e.target === mapCanvas) {
+                        state.selectedPoint = null;
+                        state.routeActive = false;
+                        renderApp();
+                    }
+                });
+            }
+        }
+
+        // ==================== 2. STORE VIEW ====================
+        function renderStoreView() {
+            return `
+                <div class="flex-1 p-4 overflow-y-auto">
+                    <!-- Store Banner -->
+                    <div class="bg-gradient-to-r from-emerald-600 to-emerald-800 rounded-3xl p-6 text-white shadow-lg mb-6 relative overflow-hidden">
+                        <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-emerald-500/30 rounded-full blur-xl pointer-events-none"></div>
+                        <div class="flex items-center space-x-2 text-emerald-200 text-xs font-semibold mb-1 uppercase tracking-wider">
+                            <i data-lucide="sparkles" class="w-4 h-4 text-amber-300"></i>
+                            <span>Clube EcoRecompensas</span>
+                        </div>
+                        <h2 class="text-xl font-bold mb-2">Troque seus pontos por benefícios sustentáveis</h2>
+                        <p class="text-xs text-emerald-100 max-w-xs mb-4">Incentive o consumo consciente e apoie causas ambientais com o seu saldo acumulado.</p>
+                        <div class="inline-flex items-center bg-emerald-900/60 px-3 py-1.5 rounded-xl border border-emerald-500/30">
+                            <i data-lucide="award" class="w-4 h-4 text-amber-300 mr-2"></i>
+                            <span class="text-xs font-medium">Seu saldo atual: <strong class="text-amber-300">${state.points.toLocaleString()} pts</strong></span>
+                        </div>
+                    </div>
+
+                    <!-- Rewards Grid -->
+                    <h3 class="font-bold text-slate-800 text-base mb-3">Itens Disponíveis para Resgate</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-6">
+                        ${state.rewards.map(item => `
+                            <div class="bg-white rounded-3xl p-4 shadow-sm border border-slate-200/80 flex flex-col justify-between transition-all hover:shadow-md">
+                                <div>
+                                    <div class="w-full h-36 rounded-2xl overflow-hidden mb-3 bg-slate-100 relative">
+                                        <img src="${item.image}" alt="${item.title}" class="w-full h-full object-cover">
+                                        <div class="absolute top-3 right-3 bg-white/90 backdrop-blur px-2.5 py-1 rounded-full text-xs font-bold text-emerald-700 shadow">
+                                            ${item.cost} pts
+                                        </div>
+                                    </div>
+                                    <h4 class="font-bold text-slate-800 text-sm mb-1">${item.title}</h4>
+                                    <p class="text-xs text-slate-500 mb-4">${item.desc}</p>
+                                </div>
+                                <button onclick="redeemReward(${item.id})" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white py-2.5 rounded-xl font-semibold text-xs shadow-md shadow-emerald-600/20 transition-all flex items-center justify-center space-x-1.5">
+                                    <i data-lucide="gift" class="w-4 h-4"></i>
+                                    <span>Resgatar Recompensa</span>
+                                </button>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function redeemReward(id) {
+            const reward = state.rewards.find(r => r.id === id);
+            if (!reward) return;
+
+            if (state.points >= reward.cost) {
+                state.points -= reward.cost;
+                updateHeaderPoints();
+                
+                // Add to history
+                state.pointsHistory.unshift({
+                    id: Date.now(),
+                    title: `Resgate: ${reward.title}`,
+                    points: -reward.cost,
+                    date: 'Agora mesmo'
+                });
+
+                renderApp();
+                showToast(`🎉 Recompensa "${reward.title}" resgatada com sucesso! Verifique seu e-mail.`);
+            } else {
+                showToast(`❌ Pontos insuficientes! Você precisa de mais ${reward.cost - state.points} pts.`);
+            }
+        }
+
+        // ==================== 3. PROFILE VIEW ====================
+        function renderProfileView() {
+            return `
+                <div class="flex-1 p-4 overflow-y-auto space-y-5 pb-8">
+                    <!-- Profile Header Card -->
+                    <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/80 text-center relative overflow-hidden">
+                        <div class="absolute top-0 left-0 right-0 h-20 bg-gradient-to-r from-emerald-600 to-emerald-800"></div>
+                        <div class="relative mt-6 mb-3 inline-block">
+                            <div class="w-20 h-20 rounded-full bg-emerald-500 border-4 border-white shadow-xl mx-auto flex items-center justify-center text-3xl">
+                                🌿
+                            </div>
+                            <span class="absolute bottom-0 right-0 bg-amber-400 text-slate-900 text-[10px] font-bold px-2 py-0.5 rounded-full shadow">Lv. ${state.level}</span>
+                        </div>
+                        <h2 class="font-bold text-lg text-slate-800">Mariana Silva</h2>
+                        <p class="text-xs text-emerald-600 font-semibold mb-3">${state.levelTitle}</p>
+                        
+                        <!-- XP Bar -->
+                        <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100 text-left mb-4">
+                            <div class="flex justify-between text-xs font-semibold mb-1 text-slate-600">
+                                <span>XP Próximo Nível</span>
+                                <span>${state.xp} / 1000 XP</span>
+                            </div>
+                            <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                                <div class="bg-emerald-600 h-full rounded-full" style="width: ${(state.xp / 1000) * 100}%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Stats Row -->
+                        <div class="grid grid-cols-3 gap-2">
+                            <div class="bg-emerald-50/60 p-3 rounded-2xl text-center">
+                                <span class="block text-emerald-700 font-bold text-sm">${state.stats.kgRecycled} kg</span>
+                                <span class="text-[10px] text-slate-500 font-medium">Reciclados</span>
+                            </div>
+                            <div class="bg-emerald-50/60 p-3 rounded-2xl text-center">
+                                <span class="block text-emerald-700 font-bold text-sm">${state.stats.collections}</span>
+                                <span class="text-[10px] text-slate-500 font-medium">Coletas</span>
+                            </div>
+                            <div class="bg-emerald-50/60 p-3 rounded-2xl text-center">
+                                <span class="block text-emerald-700 font-bold text-sm">${state.stats.co2Saved}</span>
+                                <span class="text-[10px] text-slate-500 font-medium">CO₂ Salvo</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Achievements Section -->
+                    <div>
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="font-bold text-slate-800 text-base">Conquistas & Medalhas</h3>
+                            <span class="text-xs text-slate-400 font-medium">2 de 4 desbloqueadas</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            ${state.achievements.map(ach => `
+                                <div class="bg-white rounded-2xl p-3.5 shadow-sm border ${ach.unlocked ? 'border-emerald-200 bg-emerald-50/20' : 'border-slate-200/80 opacity-60'} flex items-center space-x-3">
+                                    <div class="w-10 h-10 rounded-xl ${ach.unlocked ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-400'} flex items-center justify-center text-xl shadow-inner">
+                                        ${ach.icon}
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-xs text-slate-800">${ach.title}</h4>
+                                        <p class="text-[10px] text-slate-500 leading-tight mt-0.5">${ach.desc}</p>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Activity History -->
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-base mb-3">Histórico de Atividades</h3>
+                        <div class="bg-white rounded-3xl p-4 shadow-sm border border-slate-200/80 space-y-3">
+                            ${state.pointsHistory.map(hist => `
+                                <div class="flex items-center justify-between pb-3 border-b border-slate-100 last:border-0 last:pb-0">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-9 h-9 rounded-xl ${hist.points > 0 ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600'} flex items-center justify-center">
+                                            <i data-lucide="${hist.points > 0 ? 'arrow-down-left' : 'arrow-up-right'}" class="w-4 h-4"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-semibold text-xs text-slate-800">${hist.title}</h4>
+                                            <span class="text-[10px] text-slate-400">${hist.date}</span>
+                                        </div>
+                                    </div>
+                                    <span class="font-bold text-xs ${hist.points > 0 ? 'text-emerald-600' : 'text-slate-600'}">${hist.points > 0 ? '+' : ''}${hist.points} pts</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ==================== DEPOSIT MODAL LOGIC ====================
+        function openDepositModal() {
+            const modal = document.getElementById('deposit-modal');
+            const content = document.getElementById('deposit-modal-content');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            modal.classList.add('opacity-100', 'pointer-events-auto');
+            content.classList.remove('scale-95');
+            content.classList.add('scale-100');
+        }
+
+        function closeDepositModal() {
+            const modal = document.getElementById('deposit-modal');
+            const content = document.getElementById('deposit-modal-content');
+            modal.classList.remove('opacity-100', 'pointer-events-auto');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            content.classList.remove('scale-100');
+            content.classList.add('scale-95');
+        }
+
+        function confirmDeposit() {
+            const material = document.getElementById('deposit-material').value;
+            const weight = parseFloat(document.getElementById('deposit-weight').value) || 1.0;
+
+            // Calculate points based on material
+            let ptsPerKg = 100;
+            if (material === 'plastico') ptsPerKg = 150;
+            if (material === 'metal') ptsPerKg = 200;
+            if (material === 'eletrônicos') ptsPerKg = 350;
+            if (material === 'vidro') ptsPerKg = 120;
+
+            const earnedPts = Math.round(ptsPerKg * weight);
+            const earnedXp = Math.round(earnedPts * 0.5);
+
+            state.points += earnedPts;
+            state.xp += earnedXp;
+            state.stats.kgRecycled = parseFloat((state.stats.kgRecycled + weight).toFixed(1));
+            state.stats.collections += 1;
+
+            if (state.xp >= 1000) {
+                state.level += 1;
+                state.xp -= 1000;
+                showToast(`⭐ PARABÉNS! Você subiu para o Nível ${state.level}!`);
+            }
+
+            state.pointsHistory.unshift({
+                id: Date.now(),
+                title: `Descarte de ${material.charAt(0).toUpperCase() + material.slice(1)} (${weight}kg)`,
+                points: +earnedPts,
+                date: 'Agora mesmo'
+            });
+
+            closeDepositModal();
+            updateHeaderPoints();
+            renderApp();
+            showToast(`♻️ Descarte registrado com sucesso! Você ganhou +${earnedPts} pontos!`);
+        }
+
+        // ==================== TOAST NOTIFICATION ====================
+        function showToast(message) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'bg-slate-900 text-white text-xs px-4 py-3 rounded-2xl shadow-xl flex items-center space-x-3 border border-slate-800 animate-in fade-in slide-in-from-bottom duration-300';
+            toast.innerHTML = `
+                <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400 shrink-0"></i>
+                <span class="flex-1">${message}</span>
+            `;
+            container.appendChild(toast);
+            lucide.createIcons();
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+    </script>
+</body>
+</html>
